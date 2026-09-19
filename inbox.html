@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inbox Dashboard | Nexora Web</title><link rel="stylesheet" href="style.css"></head><body><header class="navbar"><div class="container nav-inner">
+<a class="brand" href="index.html"><span class="brand-mark">N</span><span>Nexora <span>Web</span></span></a>
+<button class="menu-btn" aria-label="Toggle navigation">☰</button><nav class="nav-links">
+<a href="index.html" class="">Home</a><a href="about.html" class="">About</a><a href="services.html" class="">Services</a><a href="portfolio.html" class="">Portfolio</a><a href="contact.html" class="">Contact</a><a class="nav-cta" href="contact.html">Get a Quote ↗</a></nav></div></header>
+<main><section class="page-hero"><div class="container"><div class="eyebrow">Private workspace · demo</div><h1>Your message <span class="gradient-text">inbox.</span></h1><p>View contact form submissions saved in this browser.</p></div></section>
+<section class="section" style="padding-top:20px"><div class="container inbox-wrap"><div class="security-note"><strong>Demo inbox notice:</strong> This dashboard reads LocalStorage from the same browser/device where the contact form was submitted. It is not a secure, shared admin system. For private, cross-device access, connect a backend with authentication.</div>
+<div class="inbox-toolbar"><div><h2 style="font:700 1.5rem 'Space Grotesk';margin:0">Contact submissions</h2><span class="muted" id="messageCount">Loading…</span></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" id="exportBtn">Export CSV ↓</button><button class="btn btn-outline btn-sm" id="clearBtn">Clear inbox</button></div></div><div id="inboxList" class="inbox-list"></div></div></section></main><footer class="footer"><div class="container"><div class="footer-grid">
+<div><a class="brand" href="index.html"><span class="brand-mark">N</span><span>Nexora <span>Web</span></span></a><p>Modern websites. Smart solutions. We turn your ideas into thoughtful digital experiences.</p></div>
+<div><h4>Explore</h4><div class="footer-links"><a href="about.html">About Nexora</a><a href="services.html">Our Services</a><a href="portfolio.html">Selected Work</a><a href="contact.html">Contact Us</a></div></div>
+<div><h4>Let’s Connect</h4><div class="footer-links"><a href="contact.html">Start a project</a><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram ↗</a><a href="inbox.html">Inbox Dashboard</a></div></div>
+</div><div class="copyright"><span>© <span data-year></span> Nexora Web. All rights reserved.</span><span>Designed with clarity & creativity.</span></div></div></footer><script src="app.js"></script>
+<script>
+(function(){
+const KEY="nexora_web_messages_v1",list=document.getElementById("inboxList"),count=document.getElementById("messageCount");
+const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{return[]}};
+const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function render(){
+ const items=read();count.textContent=items.length+" message"+(items.length===1?"":"s");
+ if(!items.length){list.innerHTML='<div class="empty"><div style="font-size:2rem;margin-bottom:8px">✉</div><strong>No messages yet</strong><br>Contact form submissions from this browser will appear here.</div>';return;}
+ list.innerHTML=items.map(m=>'<article class="message"><div class="message-head"><div><strong>'+esc(m.name)+'</strong> <span class="tag">'+esc(m.status||"New")+'</span><br><small>'+esc(m.email)+' · '+esc(m.service)+' · '+new Date(m.createdAt).toLocaleString()+'</small></div><div class="message-actions"><a class="btn btn-outline btn-sm" href="mailto:'+encodeURIComponent(m.email)+'?subject='+encodeURIComponent("Re: Nexora Web inquiry")+'">Reply ↗</a><button class="btn btn-outline btn-sm" data-delete="'+esc(m.id)+'">Delete</button></div></div><p>'+esc(m.message)+'</p>'+(m.budget?'<small>Budget: '+esc(m.budget)+'</small>':'')+'</article>').join("");
+ list.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>{localStorage.setItem(KEY,JSON.stringify(read().filter(m=>m.id!==b.dataset.delete)));render();}));
+}
+document.getElementById("clearBtn").addEventListener("click",()=>{if(confirm("Delete all messages saved in this browser?")){localStorage.removeItem(KEY);render();}});
+document.getElementById("exportBtn").addEventListener("click",()=>{const items=read();if(!items.length){alert("No messages to export.");return;}const cols=["name","email","service","budget","message","createdAt","status"];const csv=[cols.join(","),...items.map(m=>cols.map(k=>'"'+String(m[k]||"").replace(/"/g,'""')+'"').join(","))].join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="nexora-messages.csv";a.click();URL.revokeObjectURL(a.href);});
+render();
+})();
+</script></body></html>
